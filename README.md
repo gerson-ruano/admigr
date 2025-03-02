@@ -1,3 +1,41 @@
+
+## Descripción
+
+Aplicación que permite gestionar productos, administracion de roles y permisos de usuarios para ingreso al sistema asi como productos existentes, visualizaciòn de dashboard.
+
+### Instalación
+
+```
+# Clona y accede al repositorio
+$ git clone https://github.com/gerson-ruano/admigr.git
+$ cd admigr
+
+# Instala las dependencias
+$ composer install
+$ npm install
+
+# Genera la base de datos (Configura las credencias en el archivo .env)
+$ php artisan migrate
+
+# Genera una llave para la aplicación
+$ php artisan key:generate
+
+# Inicia el servidor
+$ npm run dev
+$ npm run build
+```
+
+### Tecnologías empleadas
+
+**Laravel** he utilizado Laravel 12 ya que me ha permitido crear fácilmente la estructura básica del proyecto haciendo uso de sus librerías, paquetes y herramientas. 
+**Filament** para el el diseño y estructura del proyecto
+**Tailwind** para el diseño de los estilos del proyecto
+**livewire** para crear componentes personalizados: para la reactividad de la pagina
+**Heroicons** para los iconos del proyecto
+
+
+## Documentación
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">

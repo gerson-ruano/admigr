@@ -24,11 +24,11 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                ->label(__('filament-forms::form.name'))
+                ->label(__('nombre'))
                 ->required()
                 ->maxLength(255),
                 Forms\Components\TextInput::make('email')
-                ->label('Email address')
+                ->label('Email direccion')
                 ->email()
                 ->required()
                 ->maxLength(255),
@@ -38,7 +38,7 @@ class UserResource extends Resource
                 ->required()
                 ->maxLength(255),
                 Forms\Components\TextInput::make('password_confirmation')
-                ->label('Confirm password')
+                ->label('Confirmar password')
                 ->password()
                 ->required()
                 ->same('password')
@@ -50,11 +50,12 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable(),
-                //->label(__('form.name')),
+                Tables\Columns\TextColumn::make('name')->searchable()
+                ->label(__('Nombre')),
                 Tables\Columns\TextColumn::make('email'),
-                Tables\Columns\TextColumn::make('email_verified_at')->sortable(),
-                Tables\Columns\TextColumn::make('acciones')
+                Tables\Columns\TextColumn::make('email_verified_at')->sortable()
+                ->label(__('verificacion de email')),
+                Tables\Columns\TextColumn::make('actions')
                     ->label('Acciones')
                     ->sortable(false)
                     ->default('') // Evita que se muestre contenido en la columna
@@ -66,7 +67,7 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make()
+                //Tables\Actions\DeleteAction::make()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
