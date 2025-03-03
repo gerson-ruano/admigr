@@ -12,6 +12,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Forms\Components\FileUpload;
 
 class UserResource extends Resource
 {
@@ -27,16 +30,51 @@ class UserResource extends Resource
                 ->label(__('nombre'))
                 ->required()
                 ->maxLength(255),
+
+                Forms\Components\TextInput::make('phone')
+                ->label(__('Telefono'))
+                ->required()
+                ->maxLength(255),
+
                 Forms\Components\TextInput::make('email')
                 ->label('Email direccion')
                 ->email()
                 ->required()
                 ->maxLength(255),
+
+                Select::make('role')
+                ->label('Rol')
+                ->options([
+                    '1' => 'Admin',
+                    '2' => 'User',
+                ]),
+
+                Select::make('status')
+                ->label('Estatus')
+                ->options([
+                    '1' => 'Activo',
+                    '0' => 'Inactivo',
+                ]),
+
+                FileUpload::make('image')
+                ->label('Imagen')
+                ->image()
+                ->directory('users')
+                ->required(),
+
+                Select::make('tema')
+                ->label('Tema')
+                ->options([
+                    '0' => 'Light',
+                    '1' => 'Dark',
+                ]),
+               
                 Forms\Components\TextInput::make('password')
                 ->label('Password')
                 ->password()
                 ->required()
                 ->maxLength(255),
+
                 Forms\Components\TextInput::make('password_confirmation')
                 ->label('Confirmar password')
                 ->password()
@@ -52,14 +90,33 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()
                 ->label(__('Nombre')),
+
+                Tables\Columns\TextColumn::make('phone')->searchable()
+                ->label(__('Telefono')),
+
                 Tables\Columns\TextColumn::make('email'),
+                Tables\Columns\TextColumn::make('role')->searchable()
+                ->label(__('Rol')),
+
+                
+                Tables\Columns\TextColumn::make('status')
+                ->label('Estado')
+                ->formatStateUsing(fn ($state) => $state == '1' ? 'Activo' : 'Inactivo')
+                ->badge() // Opcional: Muestra un badge de color
+                ->color(fn ($state) => $state == '1' ? 'success' : 'danger'),
+
+                ImageColumn::make('image')
+                ->label('Imagen'),
+                
+
+                Tables\Columns\TextColumn::make('tema')
+                ->label('Tema')
+                ->formatStateUsing(fn ($state) => $state == '1' ? 'Dark' : 'Light')
+                ->badge() // Opcional: Muestra un badge de color
+                ->color(fn ($state) => $state == '1' ? 'danger' : 'primary'),
+
                 Tables\Columns\TextColumn::make('email_verified_at')->sortable()
                 ->label(__('verificacion de email')),
-                Tables\Columns\TextColumn::make('actions')
-                    ->label('Acciones')
-                    ->sortable(false)
-                    ->default('') // Evita que se muestre contenido en la columna
-                    ->extraAttributes(['class' => 'text-center font-bold']), 
                 
             ])
             ->filters([

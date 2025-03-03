@@ -18,7 +18,8 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
+
 
     public static function form(Form $form): Form
     {
@@ -51,7 +52,7 @@ class CategoryResource extends Resource
                     ->badge() // Opcional: Muestra un badge de color
                     ->color(fn ($state) => $state == '1' ? 'success' : 'danger') 
             ])
-            
+
                     
             ->filters([
                 //
