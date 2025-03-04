@@ -31,15 +31,35 @@ class ProductResource extends Resource
                 ->required()
                 ->maxLength(255),
 
+                Forms\Components\TextInput::make('barcode')
+                ->label(__('Codigo'))
+                ->required()
+                ->maxLength(10),
+
                 Forms\Components\TextInput::make('description')
                 ->label(__('Descripción'))
                 ->required()
                 ->maxLength(255),
 
+                Forms\Components\TextInput::make('cost')
+                ->label(__('Costo'))
+                ->required()
+                ->maxLength(10),
+
                 Forms\Components\TextInput::make('price')
                 ->label(__('Precio'))
                 ->required()
-                ->maxLength(255),
+                ->maxLength(10),
+
+                Forms\Components\TextInput::make('stock')
+                ->label(__('Stock'))
+                ->required()
+                ->maxLength(10),
+
+                Forms\Components\TextInput::make('alerts')
+                ->label(__('Alertas'))
+                ->required()
+                ->maxLength(10),
 
                 FileUpload::make('image')
                 ->label('Imagen')
@@ -58,12 +78,20 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('description')->searchable()
-                ->label(__('Descripciòn')),
                 Tables\Columns\TextColumn::make('name')->searchable()
                 ->label(__('Nombre')),
+                Tables\Columns\TextColumn::make('barcode')->searchable()
+                ->label(__('Codigo')),
+                Tables\Columns\TextColumn::make('description')->searchable()
+                ->label(__('Descripción')),
+                Tables\Columns\TextColumn::make('cost')->searchable()
+                ->label(__('Costo')),
                 Tables\Columns\TextColumn::make('price')->searchable()
                 ->label(__('Precio')),
+                Tables\Columns\TextColumn::make('stock')->searchable()
+                ->label(__('Stock')),
+                Tables\Columns\TextColumn::make('alerts')->searchable()
+                ->label(__('Alertas')),
                 ImageColumn::make('image')
                 ->label('Imagen')
             ])

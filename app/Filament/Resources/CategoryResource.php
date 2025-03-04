@@ -13,6 +13,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\ImageColumn;
 
 class CategoryResource extends Resource
 {
@@ -37,6 +39,14 @@ class CategoryResource extends Resource
                 ])
                 ->default('active')
                 ->required(),
+                Forms\Components\TextInput::make('slug')
+                ->label(__('Slug'))
+                ->required()
+                ->maxLength(255),
+                FileUpload::make('image')
+                ->label('Imagen')
+                ->image()
+                ->directory('categories'),
             ]);
     }
 
@@ -50,7 +60,11 @@ class CategoryResource extends Resource
                     ->label('Estado')
                     ->formatStateUsing(fn ($state) => $state == '1' ? 'Activo' : 'Inactivo')
                     ->badge() // Opcional: Muestra un badge de color
-                    ->color(fn ($state) => $state == '1' ? 'success' : 'danger') 
+                    ->color(fn ($state) => $state == '1' ? 'success' : 'danger') ,
+                    Tables\Columns\TextColumn::make('slug')->searchable()
+                ->label(__('Slug')),
+                ImageColumn::make('image')
+                ->label('Imagen'),
             ])
 
                     

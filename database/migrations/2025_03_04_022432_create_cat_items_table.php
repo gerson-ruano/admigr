@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('cat_items', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->unsignedTinyInteger('status')->default(1);
-            $table->string('slug')->nullable();
-            $table->string('image')->nullable();
+            $table->string('category'); // 'profile' o 'status'
+            $table->unsignedTinyInteger('code'); // Valores 0, 1, 2, etc.
+            $table->string('description'); // Descripción asociada
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('cat_items');
     }
 };

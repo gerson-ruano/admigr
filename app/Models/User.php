@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -19,9 +20,25 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'phone',
         'email',
+        'profile',
+        'status',
         'password',
+        'profile',
+        'image',
+        'tema',
     ];
+
+    public function profileDescription(): HasOne
+    {
+        return $this->hasOne(CatItem::class, 'code', 'profile')->where('category', 'profile');
+    }
+
+    public function statusDescription(): HasOne
+    {
+        return $this->hasOne(CatItem::class, 'code', 'status')->where('category', 'status');
+    }
 
     /**
      * The attributes that should be hidden for serialization.

@@ -14,13 +14,16 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\FileUpload;
+
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
+    
 
     public static function form(Form $form): Form
     {
@@ -32,6 +35,7 @@ class UserResource extends Resource
                 ->maxLength(255),
 
                 Forms\Components\TextInput::make('phone')
+                ->numeric()
                 ->label(__('Telefono'))
                 ->required()
                 ->maxLength(255),
@@ -42,25 +46,27 @@ class UserResource extends Resource
                 ->required()
                 ->maxLength(255),
 
-                Select::make('role')
+                Select::make('profile')
                 ->label('Rol')
                 ->options([
-                    '1' => 'Admin',
-                    '2' => 'User',
+                    '0' => 'Admin',
+                    '1' => 'Employee',
+                    '2' => 'Seller',
                 ]),
 
                 Select::make('status')
                 ->label('Estatus')
                 ->options([
-                    '1' => 'Activo',
-                    '0' => 'Inactivo',
+                    '0' => 'Activo',
+                    '1' => 'Inactivo',
+                    '2' => 'Locked',
                 ]),
 
                 FileUpload::make('image')
                 ->label('Imagen')
                 ->image()
-                ->directory('users')
-                ->required(),
+                ->directory('users'),
+                //->required(),
 
                 Select::make('tema')
                 ->label('Tema')
@@ -91,28 +97,46 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')->searchable()
                 ->label(__('Nombre')),
 
-                Tables\Columns\TextColumn::make('phone')->searchable()
+                Tables\Columns\TextColumn::make('phone')
                 ->label(__('Telefono')),
 
-                Tables\Columns\TextColumn::make('email'),
-                Tables\Columns\TextColumn::make('role')->searchable()
-                ->label(__('Rol')),
+                Tables\Columns\TextColumn::make('email')
+                ->label('Email'),
 
-                
+                /*
+                Tables\Columns\TextColumn::make('profile')
+                ->label('Rol')
+                ->formatStateUsing(fn ($state) => match ($state) {
+                    0 => 'Admin',
+                    1 => 'Employee',
+                    2 => 'Seller',
+                    default => 'Desconocido',
+                })
+                ->badge()
+                ->color(fn ($state) => match ($state) {
+                    0 => 'danger',    
+                    1 => 'success',   
+                    2 => 'warning',   
+                    default => 'secondary'
+                }),*/
+
+                TextColumn::make('profileDescription.description')->label('Perfil'),
+
                 Tables\Columns\TextColumn::make('status')
                 ->label('Estado')
-                ->formatStateUsing(fn ($state) => $state == '1' ? 'Activo' : 'Inactivo')
-                ->badge() // Opcional: Muestra un badge de color
-                ->color(fn ($state) => $state == '1' ? 'success' : 'danger'),
+                ->formatStateUsing(fn ($state) => $state == '0' ? 'Activo' : 'Inactivo')
+                ->badge() 
+                ->color(fn ($state) => $state == '0' ? 'success' : 'danger'),
+
+                
 
                 ImageColumn::make('image')
-                ->label('Imagen'),
-                
+                ->label('Imagen'), 
 
                 Tables\Columns\TextColumn::make('tema')
                 ->label('Tema')
                 ->formatStateUsing(fn ($state) => $state == '1' ? 'Dark' : 'Light')
-                ->badge() // Opcional: Muestra un badge de color
+                ->badge() 
                 ->color(fn ($state) => $state == '1' ? 'danger' : 'primary'),
 
                 Tables\Columns\TextColumn::make('email_verified_at')->sortable()
