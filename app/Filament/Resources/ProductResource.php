@@ -64,8 +64,8 @@ class ProductResource extends Resource
                 FileUpload::make('image')
                 ->label('Imagen')
                 ->image()
-                ->directory('products')
-                ->required(),
+                ->directory('products'),
+            
 
                 Select::make('category_id')
                 ->label('Categoría')
@@ -90,10 +90,17 @@ class ProductResource extends Resource
                 ->label(__('Precio')),
                 Tables\Columns\TextColumn::make('stock')->searchable()
                 ->label(__('Stock')),
+
                 Tables\Columns\TextColumn::make('alerts')->searchable()
-                ->label(__('Alertas')),
+                ->label(__('Alertas'))
+                ->badge() 
+                ->color(fn ($state) => $state > 9 ? 'success' : 'danger'),
+
                 ImageColumn::make('image')
                 ->label('Imagen')
+                ->size(40)
+                ->extraAttributes(['style' => 'border-radius: 8px; object-fit: cover;'])
+                ->getStateUsing(fn ($record) => $record->image ? asset('storage/' . $record->image) : asset('storage/noimg.jpg')),
             ])
             ->filters([
                 //

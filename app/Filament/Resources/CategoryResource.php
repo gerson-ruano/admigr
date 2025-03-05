@@ -15,6 +15,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Database\Eloquent\Model;
 
 class CategoryResource extends Resource
 {
@@ -31,23 +34,37 @@ class CategoryResource extends Resource
                 ->label(__('nombre'))
                 ->required()
                 ->maxLength(255),
+
                 Select::make('status')
                 ->label('Estado')
                 ->options([
-                    '1' => 'Activo',
-                    '0' => 'Inactivo',
+                    '0' => 'Activo',
+                    '1' => 'Inactivo',
+                    '2' => 'Locked',
                 ])
                 ->default('active')
                 ->required(),
+
                 Forms\Components\TextInput::make('slug')
                 ->label(__('Slug'))
                 ->required()
                 ->maxLength(255),
+
                 FileUpload::make('image')
                 ->label('Imagen')
                 ->image()
-                ->directory('categories'),
-            ]);
+                ->imageEditor()
+                ->circleCropper() 
+                ->directory('categories')
+                ->visibility('public')
+                ->getUploadedFileNameForStorageUsing(fn ($file) => $file->hashName())
+                //->default(fn ($record) => $record->image ? asset('storage/' . $record->image) : null),
+                //cargar imagen cuando se cree  
+                //->loadStateFromRecordUsing(fn ($record) => $record->image ? asset('storage/' . $record->image) : null),
+                ]);
+                //->successRedirectUrl(route('filament.escritorio.resources.categories.index'));
+                
+            
     }
 
     public static function table(Table $table): Table
@@ -56,15 +73,19 @@ class CategoryResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->searchable()
                 ->label(__('Nombre')),
-                    Tables\Columns\TextColumn::make('status')
-                    ->label('Estado')
-                    ->formatStateUsing(fn ($state) => $state == '1' ? 'Activo' : 'Inactivo')
-                    ->badge() // Opcional: Muestra un badge de color
-                    ->color(fn ($state) => $state == '1' ? 'success' : 'danger') ,
-                    Tables\Columns\TextColumn::make('slug')->searchable()
+
+                TextColumn::make('statusDescription.description')->label('Estado'),
+ 
+                Tables\Columns\TextColumn::make('slug')->searchable()
                 ->label(__('Slug')),
+                
                 ImageColumn::make('image')
-                ->label('Imagen'),
+                ->label('Imagen')
+                ->size(40)
+                ->extraAttributes(['style' => 'border-radius: 8px; object-fit: cover;'])
+                ->getStateUsing(fn ($record) => $record->image ? asset('storage/' . $record->image) : asset('storage/noimg.jpg')),
+                //->url(fn ($record) => asset('storage/' . $record->image)),
+                
             ])
 
                     
@@ -73,6 +94,8 @@ class CategoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                
+                
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

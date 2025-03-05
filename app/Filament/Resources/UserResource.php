@@ -18,6 +18,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\FileUpload;
 
 
+
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -88,6 +89,7 @@ class UserResource extends Resource
                 ->same('password')
                 ->dehydrated(false),
             ]);
+            
     }
 
     public static function table(Table $table): Table
@@ -128,10 +130,10 @@ class UserResource extends Resource
                 ->badge() 
                 ->color(fn ($state) => $state == '0' ? 'success' : 'danger'),
 
-                
-
                 ImageColumn::make('image')
-                ->label('Imagen'), 
+                ->label('Imagen')
+                ->circular()
+                ->getStateUsing(fn ($record) => $record->image ? asset('storage/' . $record->image) : asset('storage/noimg.jpg')), 
 
                 Tables\Columns\TextColumn::make('tema')
                 ->label('Tema')
