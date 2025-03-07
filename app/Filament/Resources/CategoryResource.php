@@ -18,6 +18,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryResource extends Resource
 {
@@ -53,18 +54,13 @@ class CategoryResource extends Resource
                 FileUpload::make('image')
                 ->label('Imagen')
                 ->image()
+                ->preserveFilenames()
                 ->imageEditor()
-                ->circleCropper() 
                 ->directory('categories')
-                ->visibility('public')
-                ->getUploadedFileNameForStorageUsing(fn ($file) => $file->hashName())
-                //->default(fn ($record) => $record->image ? asset('storage/' . $record->image) : null),
-                //cargar imagen cuando se cree  
-                //->loadStateFromRecordUsing(fn ($record) => $record->image ? asset('storage/' . $record->image) : null),
+                ->getUploadedFileNameForStorageUsing(fn ($file) => time() . '_' . $file->getClientOriginalName())
+                //->getStateUsing(fn ($record) => $record?->image ? asset('storage/' . $record->image) : null)
                 ]);
-                //->successRedirectUrl(route('filament.escritorio.resources.categories.index'));
-                
-            
+                      
     }
 
     public static function table(Table $table): Table

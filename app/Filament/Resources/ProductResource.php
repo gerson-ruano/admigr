@@ -64,7 +64,9 @@ class ProductResource extends Resource
                 FileUpload::make('image')
                 ->label('Imagen')
                 ->image()
-                ->directory('products'),
+                ->preserveFilenames()
+                ->directory('products')
+                ->getUploadedFileNameForStorageUsing(fn ($file) => time() . '_' . $file->getClientOriginalName()),
             
 
                 Select::make('category_id')

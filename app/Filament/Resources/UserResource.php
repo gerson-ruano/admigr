@@ -18,7 +18,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\FileUpload;
 
 
-
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -47,29 +46,33 @@ class UserResource extends Resource
                 ->required()
                 ->maxLength(255),
 
-                Select::make('profile')
-                ->label('Rol')
+                Forms\Components\Select::make('profile')
+                ->label('Roles')
+                ->preload()
+                ->searchable()
+                ->required()
                 ->options([
-                    '0' => 'Admin',
-                    '1' => 'Employee',
-                    '2' => 'Seller',
+                    '1' => 'Admin',
+                    '2' => 'Employee',
+                    '3' => 'Seller',
                 ]),
 
-                Select::make('status')
+                Forms\Components\Select::make('status')
                 ->label('Estatus')
                 ->options([
-                    '0' => 'Activo',
-                    '1' => 'Inactivo',
-                    '2' => 'Locked',
+                    '1' => 'Activo',
+                    '2' => 'Inactivo',
+                    '3' => 'Locked',
                 ]),
 
-                FileUpload::make('image')
+                Forms\Components\FileUpload::make('image')
                 ->label('Imagen')
                 ->image()
-                ->directory('users'),
-                //->required(),
+                ->preserveFilenames()
+                ->directory('users')
+                ->getUploadedFileNameForStorageUsing(fn ($file) => time() . '_' . $file->getClientOriginalName()),
 
-                Select::make('tema')
+                Forms\Components\Select::make('tema')
                 ->label('Tema')
                 ->options([
                     '0' => 'Light',
@@ -126,9 +129,9 @@ class UserResource extends Resource
 
                 Tables\Columns\TextColumn::make('status')
                 ->label('Estado')
-                ->formatStateUsing(fn ($state) => $state == '0' ? 'Activo' : 'Inactivo')
+                ->formatStateUsing(fn ($state) => $state == '1' ? 'Activo' : 'Inactivo')
                 ->badge() 
-                ->color(fn ($state) => $state == '0' ? 'success' : 'danger'),
+                ->color(fn ($state) => $state == '1' ? 'success' : 'danger'),
 
                 ImageColumn::make('image')
                 ->label('Imagen')
