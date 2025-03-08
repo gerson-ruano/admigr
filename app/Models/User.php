@@ -30,15 +30,20 @@ class User extends Authenticatable
         'tema',
     ];
 
-    public function profileDescription(): HasOne
+    protected $with = ['roles'];
+
+    /*public function profileDescription(): HasOne
     {
         return $this->hasOne(CatItem::class, 'code', 'profile')->where('category', 'profile');
-    }
+    }*/
+
+    
 
     public function statusDescription(): HasOne
     {
         return $this->hasOne(CatItem::class, 'code', 'status')->where('category', 'status');
     }
+
 
     /**
      * The attributes that should be hidden for serialization.

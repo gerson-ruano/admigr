@@ -16,12 +16,13 @@ return new class extends Migration
             $table->string('name');
             $table->string('phone',10)->nullable();
             $table->string('email')->unique();
-            $table->unsignedTinyInteger('profile')->default(1); 
+            $table->string('profile')->nullable();
             $table->unsignedTinyInteger('status')->default(1);
             $table->string('image',50)->nullable();
             $table->boolean('tema')->default(0);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            //$table->foreign('profile_id')->references('id')->on('roles')->onDelete('set null');
             $table->rememberToken();
             $table->timestamps();
         });

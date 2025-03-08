@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use App\Models\CatItem;
 
 class CategoryResource extends Resource
 {
@@ -36,14 +37,24 @@ class CategoryResource extends Resource
                 ->required()
                 ->maxLength(255),
 
-                Select::make('status')
+                /*Select::make('status')
                 ->label('Estado')
                 ->options([
-                    '0' => 'Activo',
-                    '1' => 'Inactivo',
-                    '2' => 'Locked',
+                    '1' => 'Activo',
+                    '2' => 'Inactivo',
+                    '3' => 'Locked',
                 ])
                 ->default('active')
+                ->required(),*/
+
+                Forms\Components\Select::make('status')
+                ->label('Estado')
+                ->options(
+                    CatItem::where('category', 'status')
+                        ->pluck('description', 'code')
+                )
+                ->preload()
+                ->searchable()
                 ->required(),
 
                 Forms\Components\TextInput::make('slug')

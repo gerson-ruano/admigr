@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name',100);
             $table->string('barcode',100);
             $table->text('description');
-            $table->integer('cost');
+            $table->decimal('cost', 10, 2);
             $table->decimal('price', 10, 2);
             $table->integer('stock');
             $table->integer('alerts');

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -11,10 +12,12 @@ class UserSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'admin',
+        $sellerRole = Role::firstOrCreate(['name' => 'seller']);
+
+        $admin = User::factory()->create([
+            'name' => 'administrador',
             'phone' => 12341234,
-            'profile' => 1,
+            'profile' => 'admin',
             'status' => 1, 
             'image' => 'miimagen.jpg',
             'tema' => 0, 
@@ -22,14 +25,26 @@ class UserSeeder extends Seeder
             'password' => '12341234',
         ]);
 
-        User::factory()->create([
-            'name' => 'seller',
+        $seller = User::factory()->create([
+            'name' => 'luis ramirez',
             'phone' => 12341234,
-            'profile' => 1,
+            'profile' => 'seller',
             'status' => 1, 
             'image' => 'noimg.png',
             'tema' => 0, 
-            'email' => 'seller@gmail.com',
+            'email' => 'seller@admin.com',
+            'password' => '12341234',
+        ]);
+        $seller->assignRole($sellerRole);
+
+        User::factory()->create([
+            'name' => 'juan perez',
+            'phone' => 12341234,
+            'profile' => 'employee',
+            'status' => 1, 
+            'image' => 'noimg.png',
+            'tema' => 0, 
+            'email' => 'employee@admin.com',
             'password' => '12341234',
         ]);
     }

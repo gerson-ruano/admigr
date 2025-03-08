@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
+use App\Models\CatItem;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -37,7 +38,7 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('phone')
                 ->numeric()
                 ->label(__('Telefono'))
-                ->required()
+                //->required()
                 ->maxLength(255),
 
                 Forms\Components\TextInput::make('email')
@@ -46,24 +47,41 @@ class UserResource extends Resource
                 ->required()
                 ->maxLength(255),
 
-                Forms\Components\Select::make('profile')
+                /*Forms\Components\Select::make('profile')
                 ->label('Roles')
+                ->options(
+                    CatItem::where('category', 'profile')
+                        ->pluck('description', 'code')
+                )
+                ->preload()
+                ->searchable()
+                ->required(),*/
+
+                Forms\Components\Select::make('role_id')
+                ->label('Rol')
+                ->relationship('roles', 'name')
                 ->preload()
                 ->searchable()
                 ->required()
-                ->options([
-                    '1' => 'Admin',
-                    '2' => 'Employee',
-                    '3' => 'Seller',
-                ]),
+                ->afterStateUpdated(function ($state, $record, callable $set) {
+                    if ($state) {
+                        $roleName = \Spatie\Permission\Models\Role::find($state)->name;
+                        $set('profile', $roleName);
+                        
+                        if ($record) {
+                            $record->profile = $roleName;
+                        }
+                    }
+                }),
+
 
                 Forms\Components\Select::make('status')
                 ->label('Estatus')
-                ->options([
-                    '1' => 'Activo',
-                    '2' => 'Inactivo',
-                    '3' => 'Locked',
-                ]),
+                ->options(
+                    CatItem::where('category', 'status')
+                        ->pluck('description', 'code')
+                )
+                ->required(),
 
                 Forms\Components\FileUpload::make('image')
                 ->label('Imagen')
@@ -125,7 +143,9 @@ class UserResource extends Resource
                     default => 'secondary'
                 }),*/
 
-                TextColumn::make('profileDescription.description')->label('Perfil'),
+                //TextColumn::make('profileDescription.description')->label('Perfil'),
+
+                TextColumn::make('roles.name')->label('Perfil'),
 
                 Tables\Columns\TextColumn::make('status')
                 ->label('Estado')
@@ -136,7 +156,8 @@ class UserResource extends Resource
                 ImageColumn::make('image')
                 ->label('Imagen')
                 ->circular()
-                ->getStateUsing(fn ($record) => $record->image ? asset('storage/' . $record->image) : asset('storage/noimg.jpg')), 
+                //->getStateUsing(fn ($record) => $record->image ? asset('storage/' . $record->image) : asset('storage/noimg.jpg')), 
+                ->getStateUsing(fn ($record) => $record->image ? asset('storage/' . $record->image) : asset('storage/noimg.jpg')),
 
                 Tables\Columns\TextColumn::make('tema')
                 ->label('Tema')

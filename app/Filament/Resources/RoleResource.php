@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Models\Role;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use BezhanSalleh\FilamentShield\Forms\ShieldSelectAllToggle;
 use App\Filament\Resources\RoleResource\Pages;
@@ -114,7 +115,8 @@ class RoleResource extends Resource implements HasShieldPermissions
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+            
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

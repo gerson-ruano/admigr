@@ -44,4 +44,9 @@ class CreateRole extends CreateRecord
 
         $this->record->syncPermissions($permissionModels);
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return route('filament.escritorio.resources.shield.roles.index');
+    }
 }
