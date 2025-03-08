@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('cat_items', function (Blueprint $table) {
             $table->id();
             $table->string('category'); // 'profile' o 'status'
-            $table->unsignedTinyInteger('code'); // Valores 0, 1, 2, etc.
-            $table->string('description'); // Descripción asociada
+            $table->unsignedTinyInteger('code'); // Valores 1, 2, etc.
+            $table->string('description'); // Descripción
             $table->timestamps();
         });
     }

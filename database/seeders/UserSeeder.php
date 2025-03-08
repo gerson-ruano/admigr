@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
 
         $sellerRole = Role::firstOrCreate(['name' => 'seller']);
 
-        $admin = User::factory()->create([
+        $superadmin = User::factory()->create([
             'name' => 'administrador',
             'phone' => 12341234,
             'profile' => 'admin',
@@ -22,8 +22,12 @@ class UserSeeder extends Seeder
             'image' => 'miimagen.jpg',
             'tema' => 0, 
             'email' => 'admin@admin.com',
-            'password' => '12341234',
+            'password' => bcrypt('12341234'),
         ]);
+        // Verificar si el rol existe, si no, crearlo
+        $role = Role::firstOrCreate(['name' => 'super_admin']);
+        // Asignar el rol al usuario
+        $superadmin->assignRole($role);
 
         $seller = User::factory()->create([
             'name' => 'luis ramirez',
