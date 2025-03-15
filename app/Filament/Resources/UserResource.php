@@ -156,7 +156,6 @@ class UserResource extends Resource
                 ImageColumn::make('image')
                 ->label('Imagen')
                 ->circular()
-                //->getStateUsing(fn ($record) => $record->image ? asset('storage/' . $record->image) : asset('storage/noimg.jpg')), 
                 ->getStateUsing(fn ($record) => $record->image ? asset('storage/' . $record->image) : asset('storage/noimg.jpg')),
 
                 Tables\Columns\TextColumn::make('tema')

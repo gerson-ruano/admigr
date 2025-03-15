@@ -13,7 +13,7 @@ class Dispatch extends Model
 
     protected $fillable = [
         'order_number',
-        'customer_id',
+        'user_id',
         'seller_id',
         'total_amount',
         'status',
@@ -24,11 +24,31 @@ class Dispatch extends Model
     protected $casts = [
         'total_amount' => 'decimal:2',
         'completed_at' => 'datetime',
+        'items' => 'arrays',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($order) {
+            if (empty($order->order_number)) {
+                $order->order_number = self::generateOrderNumber();
+            }
+
+            /*if (empty($order->user_id)) {
+                $order->user_id = auth()->id(); // Asignar el ID del usuario autenticado
+            }*/
+        });
+
+        static::saved(function ($order) {
+            $order->updateTotalAmount();
+        });
+    }
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function seller(): BelongsTo
@@ -40,34 +60,29 @@ class Dispatch extends Model
     {
         return $this->hasMany(DispatchItem::class);
     }
-    
+
+    public function updateTotalAmount()
+    {
+        $total = $this->items()->sum('subtotal');
+
+        if ($this->total_amount !== $total) {
+            $this->total_amount = $total;
+            $this->saveQuietly();
+        }
+    }
+
     // Método para generar automáticamente un número de orden
     public static function generateOrderNumber(): string
     {
         $prefix = 'ORD-';
         $date = now()->format('Ymd');
         $lastOrder = self::whereDate('created_at', today())
-                        ->orderBy('id', 'desc')
-                        ->first();
-        
+            ->orderBy('id', 'desc')
+            ->first();
+
         $sequence = $lastOrder ? intval(substr($lastOrder->order_number, -4)) + 1 : 1;
-        
+
         return $prefix . $date . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
     }
-    
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($order) {
-            if (empty($order->order_number)) {
-                $order->order_number = self::generateOrderNumber();
-            }
-            
-            // Calcular el total si no está definido y hay items
-            if (!isset($order->total_amount) && $order->relationLoaded('items')) {
-                $order->total_amount = $order->items->sum('subtotal');
-            }
-        });
-    }
+
 }

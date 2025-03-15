@@ -24,6 +24,35 @@ class DispatchItem extends Model
         'quantity' => 'integer',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($item) {
+            if (!isset($item->subtotal) && isset($item->quantity, $item->unit_price)) {
+                $item->subtotal = $item->quantity * $item->unit_price;
+            }
+        });
+
+        static::updating(function ($item) {
+            if ($item->isDirty('quantity') || $item->isDirty('unit_price')) {
+                $item->subtotal = $item->quantity * $item->unit_price;
+            }
+        });
+
+        static::saved(function ($item) {
+            if ($item->dispatch) { // Verifica que la relación no sea null
+                $item->dispatch->updateTotalAmount();
+            }
+        });
+
+        static::deleted(function ($item) {
+            if ($item->dispatch) { // Verifica que la relación no sea null
+                $item->dispatch->updateTotalAmount();
+            }
+        });
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Dispatch::class);
@@ -33,23 +62,5 @@ class DispatchItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
-    
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($item) {
-            // Calcular el subtotal automáticamente si no está definido
-            if (!isset($item->subtotal) && isset($item->quantity) && isset($item->unit_price)) {
-                $item->subtotal = $item->quantity * $item->unit_price;
-            }
-        });
-        
-        static::updating(function ($item) {
-            // Actualizar el subtotal si cambia la cantidad o el precio
-            if ($item->isDirty('quantity') || $item->isDirty('unit_price')) {
-                $item->subtotal = $item->quantity * $item->unit_price;
-            }
-        });
-    }
+
 }

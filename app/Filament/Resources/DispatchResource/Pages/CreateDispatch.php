@@ -9,4 +9,8 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateDispatch extends CreateRecord
 {
     protected static string $resource = DispatchResource::class;
+    protected function getRedirectUrl(): string
+    {
+        return route('filament.escritorio.resources.dispatches.index');
+    }
 }

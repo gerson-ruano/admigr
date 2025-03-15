@@ -37,17 +37,50 @@ class DispatchResource extends Resource
                 Forms\Components\Card::make()
                     ->schema([
                         Forms\Components\TextInput::make('order_number')
-                            ->default('ORD-' . random_int(100000, 999999))
+                            ->default('ORD-' . now()->format('Hi-dmY'))
                             ->required()
                             ->maxLength(255)
                             ->disabled()
                             ->dehydrated(),
-                        Forms\Components\Select::make('user_id')
+                        /*Forms\Components\Select::make('user_id')
                             ->relationship('customer', 'name')
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->label('Customer'),
+                            ->label('Customer'),*/
+
+                        Forms\Components\Select::make('user_id')
+                            ->relationship('customer', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+
+                                Forms\Components\TextInput::make('email')
+                                    ->label('Email address')
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(255),
+
+                                Forms\Components\Select::make('profile')
+                                    ->options([
+                                        'customer' => 'customer',  
+                                    ])
+                                    ->default('customer')  
+                                    ->hidden()  
+                                    ->required()
+                                    ->label('Customer'),
+
+                                Forms\Components\TextInput::make('password')
+                                    ->label('Password')
+                                    ->password()
+                                    ->required()
+                                    ->maxLength(255),
+
+                            ])
+                            ->required(),
                         Forms\Components\Select::make('seller_id')
                             ->relationship('seller', 'name', function (Builder $query) {
                                 return $query->role('seller');
@@ -68,29 +101,23 @@ class DispatchResource extends Resource
                         Forms\Components\Textarea::make('notes')
                             ->maxLength(65535),
                     ])->columnSpan(1),
-                
+
                 Forms\Components\Card::make()
                     ->schema([
                         Forms\Components\Repeater::make('items')
                             ->relationship()
                             ->schema([
                                 Forms\Components\Select::make('product_id')
-                                    ->relationship('product', 'name', function (Builder $query, callable $get) {
-                                        $sellerId = $get('../../seller_id');
-                                        if ($sellerId) {
-                                            return $query->where('user_id', $sellerId);
-                                        }
-                                        return $query;
-                                    })
-                                    ->required()
+                                    ->relationship('product', 'name')
                                     ->searchable()
                                     ->preload()
+                                    ->required()
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set) {
                                         if ($state) {
                                             $product = Product::find($state);
                                             if ($product) {
-                                                $set('price', $product->price);
+                                                $set('unit_price', $product->price);
                                             }
                                         }
                                     }),
@@ -100,13 +127,12 @@ class DispatchResource extends Resource
                                     ->required()
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
-                                        $price = $get('price');
-                                        $set('subtotal', $price * $state);
+                                        $unitPrice = $get('unit_price');
+                                        $set('subtotal', $unitPrice * $state);
                                     }),
-                                Forms\Components\TextInput::make('price')
+                                Forms\Components\TextInput::make('unit_price')
                                     ->numeric()
-                                    ->prefix('$')
-                                    ->required()
+                                    ->prefix('Q')
                                     ->disabled()
                                     ->dehydrated()
                                     ->reactive()
@@ -116,7 +142,7 @@ class DispatchResource extends Resource
                                     }),
                                 Forms\Components\TextInput::make('subtotal')
                                     ->numeric()
-                                    ->prefix('$')
+                                    ->prefix('Q')
                                     ->disabled()
                                     ->dehydrated()
                                     ->required(),
@@ -129,10 +155,10 @@ class DispatchResource extends Resource
                                 $totalAmount = collect($state)->sum('subtotal');
                                 $set('total_amount', $totalAmount);
                             }),
-                        
+
                         Forms\Components\TextInput::make('total_amount')
                             ->numeric()
-                            ->prefix('$')
+                            ->prefix('Q')
                             ->disabled()
                             ->dehydrated()
                             ->required(),
@@ -155,7 +181,7 @@ class DispatchResource extends Resource
                     ->sortable()
                     ->label('Seller'),
                 Tables\Columns\TextColumn::make('total_amount')
-                    ->money('usd')
+                    ->money('gtq')
                     ->sortable(),
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
@@ -208,4 +234,6 @@ class DispatchResource extends Resource
             'edit' => Pages\EditDispatch::route('/{record}/edit'),
         ];
     }
+
+
 }
