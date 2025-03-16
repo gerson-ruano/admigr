@@ -66,8 +66,9 @@ class Dispatch extends Model
         $total = $this->items()->sum('subtotal');
 
         if ($this->total_amount !== $total) {
-            $this->total_amount = $total;
-            $this->saveQuietly();
+            $this->forceFill(['total_amount' => $total])->saveQuietly();
+            //$this->total_amount = $total;
+            //$this->saveQuietly();
         }
     }
 

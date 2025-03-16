@@ -66,11 +66,11 @@ class DispatchResource extends Resource
 
                                 Forms\Components\Select::make('profile')
                                     ->options([
-                                        'customer' => 'customer',  
+                                        'customer' => 'customer',
                                     ])
-                                    ->default('customer')  
-                                    ->hidden()  
-                                    ->required()
+                                    ->default('customer')
+                                    ->hidden()
+                                    //->required()
                                     ->label('Customer'),
 
                                 Forms\Components\TextInput::make('password')
@@ -83,7 +83,8 @@ class DispatchResource extends Resource
                             ->required(),
                         Forms\Components\Select::make('seller_id')
                             ->relationship('seller', 'name', function (Builder $query) {
-                                return $query->role('seller');
+                                //return $query->role('seller');
+                                return $query->whereHas('roles', fn($q) => $q->where('name', 'seller'));
                             })
                             ->required()
                             ->searchable()
@@ -102,13 +103,14 @@ class DispatchResource extends Resource
                             ->maxLength(65535),
                     ])->columnSpan(1),
 
-                Forms\Components\Card::make()
+                    Forms\Components\Card::make()
                     ->schema([
                         Forms\Components\Repeater::make('items')
                             ->relationship()
                             ->schema([
                                 Forms\Components\Select::make('product_id')
                                     ->relationship('product', 'name')
+                                    ->label('Producto')
                                     ->searchable()
                                     ->preload()
                                     ->required()
@@ -118,51 +120,56 @@ class DispatchResource extends Resource
                                             $product = Product::find($state);
                                             if ($product) {
                                                 $set('unit_price', $product->price);
+                                                $set('subtotal', $product->price * 1);
                                             }
                                         }
                                     }),
+    
                                 Forms\Components\TextInput::make('quantity')
+                                    ->label('Cantidad')
                                     ->numeric()
                                     ->default(1)
                                     ->required()
                                     ->reactive()
                                     ->afterStateUpdated(function ($state, callable $set, $get) {
-                                        $unitPrice = $get('unit_price');
+                                        $unitPrice = $get('unit_price') ?? 0;
                                         $set('subtotal', $unitPrice * $state);
                                     }),
+    
                                 Forms\Components\TextInput::make('unit_price')
+                                    ->label('Precio unitario')
                                     ->numeric()
                                     ->prefix('Q')
                                     ->disabled()
-                                    ->dehydrated()
-                                    ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, $get) {
-                                        $quantity = $get('quantity');
-                                        $set('subtotal', $state * $quantity);
-                                    }),
+                                    ->dehydrated(),
+    
                                 Forms\Components\TextInput::make('subtotal')
+                                    ->label('Subtotal')
                                     ->numeric()
                                     ->prefix('Q')
                                     ->disabled()
                                     ->dehydrated()
-                                    ->required(),
+                                    ->live(),
+    
                             ])
                             ->defaultItems(1)
                             ->columns(2)
                             ->columnSpan(2)
                             ->reactive()
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                $totalAmount = collect($state)->sum('subtotal');
-                                $set('total_amount', $totalAmount);
-                            }),
-
+                            ->afterStateUpdated(
+                                fn($state, callable $set) =>
+                                $set('total_amount', collect($state)->sum('subtotal'))
+                            )
+                            ->live(),
+    
                         Forms\Components\TextInput::make('total_amount')
+                            ->label('Total')
                             ->numeric()
                             ->prefix('Q')
                             ->disabled()
                             ->dehydrated()
                             ->required(),
-                    ])->columnSpan(2),
+                    ])->columnSpan(2)
             ])->columns(3);
     }
 
