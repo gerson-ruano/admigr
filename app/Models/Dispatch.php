@@ -86,4 +86,30 @@ class Dispatch extends Model
         return $prefix . $date . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
     }
 
+    public function getAvailableStatuses(): array
+{
+    return match ($this->status) {
+        'pending' => [
+            'pending' => 'Pendiente',
+            'processing' => 'Procesando',
+            'completed' => 'Completado',
+            'cancelled' => 'Cancelado',
+        ],
+        'processing' => [
+            'processing' => 'Procesando',
+            'completed' => 'Completado',
+            'cancelled' => 'Cancelado',
+        ],
+        'completed', 'cancelled' => [
+            $this->status => ucfirst($this->status),
+        ],
+        default => [
+            'pending' => 'Pendiente',
+            'processing' => 'Procesando',
+            'completed' => 'Completado',
+            'cancelled' => 'Cancelado',
+        ]
+    };
+}
+
 }

@@ -21,6 +21,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\Component;
 
 
 class DispatchResource extends Resource
@@ -42,6 +44,7 @@ class DispatchResource extends Resource
                             ->maxLength(255)
                             ->disabled()
                             ->dehydrated(),
+
                         /*Forms\Components\Select::make('user_id')
                             ->relationship('customer', 'name')
                             ->required()
@@ -91,19 +94,22 @@ class DispatchResource extends Resource
                             ->preload()
                             ->label('Seller'),
                         Forms\Components\Select::make('status')
-                            ->options([
-                                'pending' => 'Pending',
-                                'processing' => 'Processing',
-                                'completed' => 'Completed',
-                                'cancelled' => 'Cancelled',
+                            ->label('Estado')
+                            ->options(fn($record) => $record?->getAvailableStatuses() ?? [
+                                'pending' => 'Pendiente',
+                                'processing' => 'Procesando',
+                                'completed' => 'Completado',
+                                'cancelled' => 'Cancelado',
                             ])
-                            ->default('pending')
+                            ->disabled(fn($record) => in_array($record?->status, ['completed', 'cancelled']))
                             ->required(),
+                        //->default('pending')
+
                         Forms\Components\Textarea::make('notes')
                             ->maxLength(65535),
                     ])->columnSpan(1),
 
-                    Forms\Components\Card::make()
+                Forms\Components\Card::make()
                     ->schema([
                         Forms\Components\Repeater::make('items')
                             ->relationship()
@@ -115,34 +121,76 @@ class DispatchResource extends Resource
                                     ->preload()
                                     ->required()
                                     ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set) {
-                                        if ($state) {
-                                            $product = Product::find($state);
-                                            if ($product) {
-                                                $set('unit_price', $product->price);
-                                                $set('subtotal', $product->price * 1);
-                                            }
+                                    ->afterStateUpdated(function ($state, callable $set, $get, $component) {
+                                        if (!$state)
+                                            return;
+
+                                        $items = $get('../../items') ?? [];
+
+                                        // Obtener la lista de productos ya seleccionados, excluyendo este
+                                        $currentPath = $component->getStatePath();
+                                        $currentKey = str($currentPath)->beforeLast('.')->after('items.')->toString();
+
+                                        /*dd([
+                                            'currentIndex' => $currentPath,
+                                            'currentkey' => $currentKey,
+                                            'itemIndices' => array_keys($items),
+                                            'items' => $items,
+                                        ]);*/
+
+                                        $isDuplicate = collect($items)
+                                            ->filter(function ($item, $key) use ($state, $currentKey) {
+                                                return $key !== $currentKey && ($item['product_id'] ?? null) == $state;
+                                            })
+                                            ->isNotEmpty();
+
+                                        if ($isDuplicate) {
+                                            $set('product_id', null);
+
+                                            Notification::make()
+                                                ->title('Producto ya ingresado')
+                                                ->body('Este producto ya ha sido seleccionado en otro ítem.')
+                                                ->danger()
+                                                ->send();
+                                            return;
+                                        }
+
+                                        // Continuar con lógica de precio y subtotal si no hay duplicado
+                                        $product = Product::find($state);
+                                        if ($product) {
+                                            $set('unit_price', $product->price);
+                                            $quantity = $get('quantity') ?? 1;
+                                            $set('subtotal', $product->price * $quantity);
+
+                                            // Actualizar total general
+                                            $newItems = collect($get('../../items') ?? []);
+                                            $total = $newItems->pluck('subtotal')->filter()->sum();
+                                            $set('../../total_amount', $total);
                                         }
                                     }),
-    
+
                                 Forms\Components\TextInput::make('quantity')
                                     ->label('Cantidad')
                                     ->numeric()
                                     ->default(1)
                                     ->required()
                                     ->reactive()
-                                    ->afterStateUpdated(function ($state, callable $set, $get) {
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                         $unitPrice = $get('unit_price') ?? 0;
                                         $set('subtotal', $unitPrice * $state);
+
+                                        $items = $get('../../items') ?? [];
+                                        $total = collect($items)->pluck('subtotal')->filter()->sum();
+                                        $set('../../total_amount', $total);
                                     }),
-    
+
                                 Forms\Components\TextInput::make('unit_price')
                                     ->label('Precio unitario')
                                     ->numeric()
                                     ->prefix('Q')
                                     ->disabled()
                                     ->dehydrated(),
-    
+
                                 Forms\Components\TextInput::make('subtotal')
                                     ->label('Subtotal')
                                     ->numeric()
@@ -150,25 +198,22 @@ class DispatchResource extends Resource
                                     ->disabled()
                                     ->dehydrated()
                                     ->live(),
-    
+
                             ])
                             ->defaultItems(1)
                             ->columns(2)
                             ->columnSpan(2)
                             ->reactive()
-                            ->afterStateUpdated(
-                                fn($state, callable $set) =>
-                                $set('total_amount', collect($state)->sum('subtotal'))
-                            )
                             ->live(),
-    
+
                         Forms\Components\TextInput::make('total_amount')
                             ->label('Total')
                             ->numeric()
                             ->prefix('Q')
                             ->disabled()
                             ->dehydrated()
-                            ->required(),
+                            ->required()
+                            ->live(),
                     ])->columnSpan(2)
             ])->columns(3);
     }
@@ -225,6 +270,16 @@ class DispatchResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
+
+    protected function getValidationMessages(): array
+    {
+        return [
+            'items.*.product_id.required' => __('filament-form::validation.required'),
+            'items.*.product_id.distinct' => __('filament-form::validation.items.product_id.duplicate'),
+            'items.*.quantity.min' => __('filament-form::validation.items.quantity.min', ['min' => 1]),
+        ];
+    }
+
 
     public static function getRelations(): array
     {

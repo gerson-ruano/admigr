@@ -17,7 +17,9 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\Navigation\NavigationItem;
+
+
+
 
 class EscritorioPanelProvider extends PanelProvider
 {
@@ -28,6 +30,7 @@ class EscritorioPanelProvider extends PanelProvider
             ->id('escritorio')
             ->path('escritorio')
             ->login()
+            ->brandLogo(asset('storage/favicon.ico'))
             ->colors([
                 'primary' => Color::Blue,
             ])
@@ -58,5 +61,8 @@ class EscritorioPanelProvider extends PanelProvider
             ->plugins([
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
             ]);
+            //color de fondo de login 
+            //->loginBackgroundImage(asset('storage/noimg.jpg'));
+
     }
 }
