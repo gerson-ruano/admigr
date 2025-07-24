@@ -2,28 +2,30 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Dispatch;
 use Filament\Widgets\ChartWidget;
 use Flowframe\Trend\Trend;
 use Flowframe\Trend\TrendValue;
+use App\Models\Dispatch;
 
-class DispatchesChart extends ChartWidget
+class DispatchesChartDay extends ChartWidget
 {
-    protected static ?string $heading = 'Chart of Dispatches';
+    
+
+    protected static ?string $heading = 'Chart of Dispatches of Day';
 
     public static function canView(): bool
     {
-        return auth()->user()->can('widget_DispatchesChart', new \stdClass);
+        return auth()->user()->can('widget_DispatchesChartDay', new \stdClass);
     }
     protected function getData(): array
     {
         
         $data = Trend::model(Dispatch::class)
         ->between(
-            start: now()->subYear(),
+            start: now()->subMonth(),
             end: now(),
         )
-        ->perMonth()
+        ->perWeek()
         ->count();
         return [
             'datasets' => [
@@ -38,8 +40,6 @@ class DispatchesChart extends ChartWidget
 
     protected function getType(): string
     {
-        return 'line';
+        return 'bar';
     }
 }
-
-

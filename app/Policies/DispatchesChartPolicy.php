@@ -17,4 +17,9 @@ class DispatchesChartPolicy
         return $user->can('widget_DispatchesChart');
     }
 
+    public function viewchartday(User $user): bool
+    {
+        return $user->can('widget_DispatchesChartDay');
+    }
+
 }
