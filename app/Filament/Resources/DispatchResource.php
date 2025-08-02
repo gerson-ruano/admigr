@@ -23,6 +23,9 @@ use Filament\Forms\Components\Repeater;
 
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\Component;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Pages\Actions\Action;
+
 
 
 class DispatchResource extends Resource
@@ -214,6 +217,7 @@ class DispatchResource extends Resource
                             ->dehydrated()
                             ->required()
                             ->live(),
+
                     ])->columnSpan(2)
             ])->columns(3);
     }
@@ -245,6 +249,7 @@ class DispatchResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
+
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('customer')
@@ -262,10 +267,17 @@ class DispatchResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+            
+            Tables\Actions\Action::make('imprimir_factura')
+                ->label('Factura')
+                ->icon('heroicon-o-printer')
+                ->url(fn ($record) => route('factura.dispatch', $record))
+                ->openUrlInNewTab()
+                ->color('gray'),
             ])
             ->bulkActions([
                 /*Tables\Actions\BulkActionGroup::make([
-                    
+
                 ]),*/
                 Tables\Actions\DeleteBulkAction::make(),
             ]);

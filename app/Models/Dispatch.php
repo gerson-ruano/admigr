@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+
 class Dispatch extends Model
 {
     use HasFactory;
@@ -24,7 +25,7 @@ class Dispatch extends Model
     protected $casts = [
         'total_amount' => 'decimal:2',
         'completed_at' => 'datetime',
-        'items' => 'arrays',
+        //'items' => 'array',
     ];
 
     protected static function boot()
@@ -87,29 +88,29 @@ class Dispatch extends Model
     }
 
     public function getAvailableStatuses(): array
-{
-    return match ($this->status) {
-        'pending' => [
-            'pending' => 'Pendiente',
-            'processing' => 'Procesando',
-            'completed' => 'Completado',
-            'cancelled' => 'Cancelado',
-        ],
-        'processing' => [
-            'processing' => 'Procesando',
-            'completed' => 'Completado',
-            'cancelled' => 'Cancelado',
-        ],
-        'completed', 'cancelled' => [
-            $this->status => ucfirst($this->status),
-        ],
-        default => [
-            'pending' => 'Pendiente',
-            'processing' => 'Procesando',
-            'completed' => 'Completado',
-            'cancelled' => 'Cancelado',
-        ]
-    };
-}
+    {
+        return match ($this->status) {
+            'pending' => [
+                'pending' => 'Pendiente',
+                'processing' => 'Procesando',
+                'completed' => 'Completado',
+                'cancelled' => 'Cancelado',
+            ],
+            'processing' => [
+                'processing' => 'Procesando',
+                'completed' => 'Completado',
+                'cancelled' => 'Cancelado',
+            ],
+            'completed', 'cancelled' => [
+                $this->status => ucfirst($this->status),
+            ],
+            default => [
+                'pending' => 'Pendiente',
+                'processing' => 'Procesando',
+                'completed' => 'Completado',
+                'cancelled' => 'Cancelado',
+            ]
+        };
+    }
 
 }
