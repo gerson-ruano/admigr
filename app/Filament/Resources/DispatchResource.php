@@ -63,7 +63,11 @@ class DispatchResource extends Resource
                             ->label('Customer'),*/
 
                         Forms\Components\Select::make('user_id')
-                            ->relationship('customer', 'name')
+                            ->relationship('customer', 'name', function (Builder $query) {
+                                $query->whereHas('roles', function ($q) {
+                                    $q->where('name', 'customer');
+                                });
+                            })
                             ->searchable()
                             ->preload()
                             ->createOptionForm([
@@ -77,23 +81,42 @@ class DispatchResource extends Resource
                                     ->required()
                                     ->maxLength(255),
 
-                                Forms\Components\Select::make('profile')
+                                /*Forms\Components\Select::make('profile')
                                     ->options([
                                         'customer' => 'customer',
                                     ])
                                     ->default('customer')
                                     ->hidden()
                                     //->required()
-                                    ->label('Customer'),
+                                    ->label('Customer'),*/
 
-                                Forms\Components\TextInput::make('password')
+                                /*Forms\Components\TextInput::make('password')
                                     ->label('Password')
                                     ->password()
                                     ->required()
-                                    ->maxLength(255),
-
+                                    ->maxLength(255),*/
                             ])
-                            ->required(),
+                            ->createOptionUsing(function (array $data) {
+                                // Crear el usuario
+                                $user = \App\Models\User::create([
+                                    'name' => $data['name'],
+                                    'email' => $data['email'],
+                                    'password' => bcrypt(12341234),
+                                ]);
+                                
+                                // Asignar el rol 'customer'
+                                $user->syncRoles(['customer']);
+                                
+                                // Opcional: Mostrar notificación de éxito
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Cliente creado exitosamente')
+                                    ->success()
+                                    ->send();
+                                
+                                return $user->id;
+                            })
+                            ->required()
+                            ->label('Customer'),
                         Forms\Components\Select::make('seller_id')
                             ->relationship('seller', 'name', function (Builder $query) {
                                 //return $query->role('seller');

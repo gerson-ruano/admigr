@@ -34,7 +34,17 @@ class ProductResource extends Resource
                 Forms\Components\TextInput::make('barcode')
                 ->label(__('Codigo'))
                 ->required()
-                ->maxLength(10),
+                ->maxLength(10)
+                ->unique(ignoreRecord: true)
+                ->rules([
+                    'required',
+                    'string',
+                    'max:10',
+                    'unique:products,barcode,' . request()->route('record'), 
+                ])
+                ->validationMessages([
+                    'unique' => 'El código :input ya está en uso. Por favor, ingrese un código diferente.',
+                ]),
 
                 Forms\Components\TextInput::make('description')
                 ->label(__('Descripción'))
