@@ -32,18 +32,10 @@ class Dispatch extends Model
     {
         parent::boot();
 
-        static::creating(function ($order) {
+            static::creating(function ($order) {
             if (empty($order->order_number)) {
                 $order->order_number = self::generateOrderNumber();
             }
-
-            /*if (empty($order->user_id)) {
-                $order->user_id = auth()->id(); // Asignar el ID del usuario autenticado
-            }*/
-        });
-
-        static::saved(function ($order) {
-            $order->updateTotalAmount();
         });
     }
 
@@ -64,12 +56,15 @@ class Dispatch extends Model
 
     public function updateTotalAmount()
     {
-        $total = $this->items()->sum('subtotal');
+        // Siempre usar los items en memoria si están cargados
+        if ($this->relationLoaded('items')) {
+            $total = $this->items->sum('subtotal');
+        } else {
+            $total = $this->items()->sum('subtotal');
+        }
 
-        if ($this->total_amount !== $total) {
+        if ($this->total_amount != $total) {
             $this->forceFill(['total_amount' => $total])->saveQuietly();
-            //$this->total_amount = $total;
-            //$this->saveQuietly();
         }
     }
 

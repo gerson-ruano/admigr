@@ -35,6 +35,13 @@ class DispatchResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document';
 
+    protected static function mutateFormDataBeforeCreate(array $data): array
+{
+    // Calcular el total como respaldo
+    $data['total_amount'] = collect($data['items'] ?? [])->sum('subtotal');
+    return $data;
+}
+
     public static function form(Form $form): Form
     {
         return $form
@@ -116,6 +123,12 @@ class DispatchResource extends Resource
                     ->schema([
                         Forms\Components\Repeater::make('items')
                             ->relationship()
+                            ->addAction(
+                                fn(\Filament\Forms\Components\Actions\Action $action) => $action
+                                    ->label('Agregar Producto')
+                                    ->icon('heroicon-m-plus')
+                                    ->color('success')
+                            )
                             ->schema([
                                 Forms\Components\Select::make('product_id')
                                     ->relationship('product', 'name')
@@ -152,7 +165,7 @@ class DispatchResource extends Resource
 
                                             Notification::make()
                                                 ->title('Producto ya ingresado')
-                                                ->body('Este producto ya ha sido seleccionado en otro ítem.')
+                                                ->body('Este producto ya ha sido seleccionado en otro producto.')
                                                 ->danger()
                                                 ->send();
                                             return;
@@ -213,11 +226,10 @@ class DispatchResource extends Resource
                             ->label('Total')
                             ->numeric()
                             ->prefix('Q')
-                            ->disabled()
+                            ->readOnly() 
                             ->dehydrated()
                             ->required()
-                            ->live(),
-
+                            ->live()
                     ])->columnSpan(2)
             ])->columns(3);
     }
