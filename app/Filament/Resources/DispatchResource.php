@@ -36,11 +36,12 @@ class DispatchResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document';
 
     protected static function mutateFormDataBeforeCreate(array $data): array
-{
-    // Calcular el total como respaldo
-    $data['total_amount'] = collect($data['items'] ?? [])->sum('subtotal');
-    return $data;
-}
+    {
+        // Calcular el total como respaldo
+        $data['total_amount'] = collect($data['items'] ?? [])->sum('subtotal');
+        return $data;
+    }
+
 
     public static function form(Form $form): Form
     {
